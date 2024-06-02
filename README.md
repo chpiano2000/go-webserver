@@ -19,7 +19,8 @@
 
 ## Structure
 
-`.
+```
+.
 ├── README.md
 ├── cmd
 │   ├── main.go       // entry point
@@ -39,10 +40,11 @@
 │   ├── setting
 │   └── utils
 └── tests             // Testing related code
-`
+```
 
 ## Features
 
+- [ ] Swagger Docs
 - [ ] Logging
 - [ ] Exception Handling
 - [ ] CRUD Recipes
