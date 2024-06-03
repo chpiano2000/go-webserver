@@ -14,6 +14,7 @@ func (rr RecipeRouter) Setup(group string) {
 	api := rr.handler.Gin.Group(group)
 	{
 		api.POST("/recipe", rr.recipeController.CreateRecipe)
+		api.GET("/recipes", rr.recipeController.ListRecipes)
 	}
 }
 

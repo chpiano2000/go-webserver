@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-webserver/internal/models"
 	"github.com/go-webserver/pkg/utils"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -30,9 +31,25 @@ func (m *MongoRecipeRepo) Create(request *models.RecipeRequest) (*models.Recipe,
 		CreatedAt:    createdAt,
 		UpdatedAt:    createdAt,
 	}
-	_, err := m.db.Collection("recipes").InsertOne(context.Background(), recipe)
+	_, err := m.db.Collection("recipes").InsertOne(context.TODO(), recipe)
 	if err != nil {
 		return nil, err
 	}
 	return &recipe, nil
+}
+
+func (m *MongoRecipeRepo) List() ([]*models.Recipe, error) {
+	cur, err := m.db.Collection("recipes").Find(context.TODO(), bson.D{})
+	if err != nil {
+		return nil, err
+	}
+	var recipes []*models.Recipe
+	for cur.Next(context.TODO()) {
+		var recipe models.Recipe
+		if err := cur.Decode(&recipe); err != nil {
+			return nil, err
+		}
+		recipes = append(recipes, &recipe)
+	}
+	return recipes, nil
 }

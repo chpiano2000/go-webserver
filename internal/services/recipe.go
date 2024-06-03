@@ -22,3 +22,11 @@ func (s RecipeService) Create(request *models.RecipeRequest) (*models.Recipe, er
 	}
 	return recipe, nil
 }
+
+func (s RecipeService) List() ([]*models.Recipe, error) {
+	recipes, err := s.recipeRepo.List()
+	if err != nil {
+		return nil, fmt.Errorf("failed to create recipe: %w", err)
+	}
+	return recipes, nil
+}

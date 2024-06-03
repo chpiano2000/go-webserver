@@ -31,3 +31,11 @@ func (rc RecipeController) CreateRecipe(c *gin.Context) {
 	}
 	c.JSON(200, gin.H{"data": recipe})
 }
+
+func (rc RecipeController) ListRecipes(c *gin.Context) {
+	recipes, err := rc.service.List()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	}
+	c.JSON(200, gin.H{"data": recipes})
+}
