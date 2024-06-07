@@ -14,7 +14,7 @@ import (
 func Start() {
 	fmt.Print("Starting server...")
 	// Load the application configuration
-	cfg, err := config.LoadConfig("config")
+	cfg, err := config.LoadConfig()
 	if err != nil {
 		// If an error occurs while loading the configuration, panic with the error.
 		panic(err)

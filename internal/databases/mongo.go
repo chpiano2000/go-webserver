@@ -11,7 +11,7 @@ import (
 )
 
 func NewMongoDB(cfg config.Config) *mongo.Database {
-	clientOptions := options.Client().ApplyURI(cfg.App.MONGO_URI)
+	clientOptions := options.Client().ApplyURI(cfg.MONGO_URI)
 	client, err := mongo.Connect(context.Background(), clientOptions)
 	if err != nil {
 		log.Fatal(err)
@@ -21,5 +21,5 @@ func NewMongoDB(cfg config.Config) *mongo.Database {
 		log.Fatal(err)
 	}
 	log.Println("Connected to MongoDB!")
-	return client.Database(cfg.App.DB_NAME)
+	return client.Database(cfg.DB_NAME)
 }
