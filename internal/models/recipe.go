@@ -5,7 +5,7 @@ import (
 )
 
 type Recipe struct {
-	Id           string    `json:"id"`
+	Id           string    `json:"_id" bson:"_id"`
 	Name         string    `json:"name"`
 	Prep         string    `json:"prep"`
 	Cook         string    `json:"cook"`

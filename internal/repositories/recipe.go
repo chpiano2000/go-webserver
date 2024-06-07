@@ -8,6 +8,7 @@ import (
 	"github.com/go-webserver/internal/models"
 	"github.com/go-webserver/pkg/utils"
 	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -19,24 +20,24 @@ func NewMongoRecipeRepo(db *mongo.Database) recipe.RecipeRepo {
 	return &mongoRecipeRepo{db: db}
 }
 
-func (m *mongoRecipeRepo) Create(request *models.RecipeRequest) (*models.Recipe, error) {
+func (m *mongoRecipeRepo) Create(request *models.RecipeRequest) (string, error) {
 	createdAt := time.Now()
-	uuid := utils.GenerateUUID()
-	recipe := models.Recipe{
-		Id:           uuid,
-		Name:         request.Name,
-		Prep:         request.Prep,
-		Cook:         request.Cook,
-		Ingredients:  request.Ingredients,
-		Instructions: request.Instructions,
-		CreatedAt:    createdAt,
-		UpdatedAt:    createdAt,
-	}
-	_, err := m.db.Collection("recipes").InsertOne(context.TODO(), recipe)
+	result, err := m.db.Collection("recipes").InsertOne(context.TODO(), bson.M{
+		"name":         request.Name,
+		"prep":         request.Prep,
+		"cook":         request.Cook,
+		"ingredients":  request.Ingredients,
+		"instructions": request.Instructions,
+		"createdAt":    createdAt,
+		"updatedAt":    createdAt,
+	})
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-	return &recipe, nil
+
+	oid := result.InsertedID.(primitive.ObjectID)
+	oidStr := oid.Hex()
+	return oidStr, nil
 }
 
 func (m *mongoRecipeRepo) List() ([]*models.Recipe, error) {
@@ -45,12 +46,39 @@ func (m *mongoRecipeRepo) List() ([]*models.Recipe, error) {
 		return nil, err
 	}
 	var recipes []*models.Recipe
-	for cur.Next(context.TODO()) {
-		var recipe models.Recipe
-		if err := cur.Decode(&recipe); err != nil {
-			return nil, err
-		}
-		recipes = append(recipes, &recipe)
+	err = cur.All(context.TODO(), &recipes)
+	if err != nil {
+		return nil, err
 	}
 	return recipes, nil
+}
+
+func (m *mongoRecipeRepo) Get(id string) (*models.Recipe, error) {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+
+	var recipeInDB models.Recipe
+	err = m.db.Collection("recipes").FindOne(context.TODO(), bson.M{"_id": oid}).Decode(&recipeInDB)
+	if err != nil {
+		if _, ok := err.(utils.RecipeMessage); ok {
+			return nil, utils.RecipeNotFound
+		}
+		return nil, err
+	}
+	return &recipeInDB, nil
+}
+
+func (m *mongoRecipeRepo) Delete(id string) error {
+	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+
+	_, err = m.db.Collection("recipes").DeleteOne(context.TODO(), bson.M{"_id": oid})
+	if err != nil {
+		return err
+	}
+	return nil
 }

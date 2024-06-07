@@ -1,8 +1,6 @@
 package services
 
 import (
-	"fmt"
-
 	"github.com/go-webserver/internal/interfaces/recipe"
 	"github.com/go-webserver/internal/models"
 
@@ -18,9 +16,14 @@ func NewService(recipeRepo recipe.RecipeRepo) recipe.RecipeUseCase {
 }
 
 func (s *recipeService) Create(request *models.RecipeRequest) (*models.Recipe, error) {
-	recipe, err := s.recipeRepo.Create(request)
+	recipeId, err := s.recipeRepo.Create(request)
 	if err != nil {
-		logger.Errorf("recipeService::Create: %v", err)
+		logger.Errorf("recipeService::Create::Create %v", err)
+		return nil, err
+	}
+	recipe, err := s.recipeRepo.Get(recipeId)
+	if err != nil {
+		logger.Errorf("recipeService::Create::Get %v", err)
 		return nil, err
 	}
 	return recipe, nil
@@ -29,7 +32,26 @@ func (s *recipeService) Create(request *models.RecipeRequest) (*models.Recipe, e
 func (s *recipeService) List() ([]*models.Recipe, error) {
 	recipes, err := s.recipeRepo.List()
 	if err != nil {
-		return nil, fmt.Errorf("failed to create recipe: %w", err)
+		logger.Errorf("recipeService::List - %v", err)
+		return nil, err
 	}
 	return recipes, nil
+}
+
+func (s *recipeService) Get(id string) (*models.Recipe, error) {
+	recipe, err := s.recipeRepo.Get(id)
+	if err != nil {
+		logger.Errorf("recipeService::Get - %v", err)
+		return nil, err
+	}
+	return recipe, nil
+}
+
+func (s *recipeService) Delete(id string) error {
+	err := s.recipeRepo.Delete(id)
+	if err != nil {
+		logger.Errorf("recipeService::Delete - %v", err)
+		return err
+	}
+	return nil
 }
