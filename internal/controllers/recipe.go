@@ -27,14 +27,12 @@ func NewRecipeController(useCase recipe.RecipeUseCase) RecipeController {
 // @Tags Recipe
 // @Accept json
 // @Produce json
-// @Success     200         {object}    models.RecipeRequest
+// @Param payload body schemas.RecipeSchemaRequest true "Create recipe payload"
+// @Success     200         {object}    models.Recipe
 // @Failure     400         {object}    response.ErrorResponse
-// @Failure     401         {object}    response.ErrorResponse
-// @Failure     403         {object}    response.ErrorResponse
-// @Failure     404         {object}    response.ErrorResponse
 // @Failure     422         {object}    response.ErrorResponse
 // @Failure     500         {object}    response.ErrorResponse
-// @Router /os-images [post]
+// @Router /recipe [post]
 func (rc RecipeController) CreateRecipe(c *gin.Context) {
 	var recipeSchemas schemas.RecipeSchemaRequest
 	if err := c.ShouldBindJSON(&recipeSchemas); err != nil {
@@ -59,10 +57,59 @@ func (rc RecipeController) CreateRecipe(c *gin.Context) {
 	c.JSON(http.StatusCreated, response.Created(successCode, successMessage, recipe))
 }
 
+// ListRecipe godoc
+// @Summary List All Recipes
+// @Description List All Recipes
+// @Tags Recipe
+// @Accept json
+// @Produce json
+// @Success     200         {array}    models.Recipe
+// @Failure     500         {object}    response.ErrorResponse
+// @Router /recipes [get]
 func (rc RecipeController) ListRecipes(c *gin.Context) {
 	recipes, err := rc.service.List()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		panic(err)
 	}
 	c.JSON(http.StatusOK, response.OK(recipes))
+}
+
+// GetRecipe godoc
+// @Summary Get One Recipe
+// @Description Get One Recipe
+// @Tags Recipe
+// @Accept json
+// @Produce json
+// @Param recipe_id path string true "Recipe Id"
+// @Success     200         {object}     models.Recipe
+// @Failure     400         {object}    response.ErrorResponse
+// @Failure     500         {object}    response.ErrorResponse
+// @Router /recipe/{recipe_id} [get]
+func (rc RecipeController) GetRecipe(c *gin.Context) {
+	id := c.Param("Id")
+	recipe, err := rc.service.Get(id)
+	if err != nil {
+		panic(err)
+	}
+	c.JSON(http.StatusOK, response.OK(recipe))
+}
+
+// DeleteRecipe godoc
+// @Summary Create Recipe
+// @Description Create Recipe
+// @Tags Recipe
+// @Accept json
+// @Produce json
+// @Param recipe_id path string true "Recipe Id"
+// @Success     200         {object}    string
+// @Failure     400         {object}    response.ErrorResponse
+// @Failure     500         {object}    response.ErrorResponse
+// @Router /recipe/{recipe_id} [delete]
+func (rc RecipeController) DeleteRecipe(c *gin.Context) {
+	id := c.Param("Id")
+	err := rc.service.Delete(id)
+	if err != nil {
+		panic(err)
+	}
+	c.JSON(http.StatusOK, utils.Serialize(c, utils.DeleteRecipeSuccessfully))
 }

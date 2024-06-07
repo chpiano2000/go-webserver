@@ -24,3 +24,12 @@ func Created(code string, message string, data interface{}) SuccessResponse {
 		Data:    data,
 	}
 }
+
+func Deleted(code string, message string, data interface{}) SuccessResponse {
+	return SuccessResponse{
+		Status:  200,
+		Code:    code,
+		Message: message,
+		Data:    data,
+	}
+}

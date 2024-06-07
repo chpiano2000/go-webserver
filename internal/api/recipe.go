@@ -15,6 +15,8 @@ func (rr RecipeRouter) Setup(group string) {
 	{
 		api.POST("/recipe", rr.recipeController.CreateRecipe)
 		api.GET("/recipes", rr.recipeController.ListRecipes)
+		api.GET("/recipe/:Id", rr.recipeController.GetRecipe)
+		api.DELETE("/recipe/:Id", rr.recipeController.DeleteRecipe)
 	}
 }
 

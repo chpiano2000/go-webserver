@@ -69,4 +69,19 @@ var (
 		MessageCode: "UnprocessableEntity",
 		Status:      http.StatusUnprocessableEntity,
 	}
+	BadRequest = RecipeMessage{
+		Message:     "Bad request",
+		MessageCode: "BadRequest",
+		Status:      http.StatusBadRequest,
+	}
+	RecipeNotFound = RecipeMessage{
+		Message:     "Recipe not found",
+		MessageCode: "RecipeNotFound",
+		Status:      http.StatusNotFound,
+	}
+	DeleteRecipeSuccessfully = RecipeMessage{
+		Message:     "Recipe deleted successfully",
+		MessageCode: "RecipeDeleted",
+		Status:      http.StatusOK,
+	}
 )
