@@ -4,8 +4,11 @@ import (
 	"fmt"
 
 	"github.com/go-webserver/config"
+	docs "github.com/go-webserver/docs"
 	"github.com/go-webserver/internal/api"
 	"github.com/go-webserver/internal/lib"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 func Start() {
@@ -20,6 +23,8 @@ func Start() {
 
 	group := "/api/v1"
 	route := lib.NewRequestHandler()
+	docs.SwaggerInfo.BasePath = group
+	route.Gin.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	healthRouter := api.NewHealthRouter(route)
 	recipeRouter := api.NewRecipeRouter(*dep.RecipeController, route)
 	routes := api.NewRoutes(healthRouter, recipeRouter)

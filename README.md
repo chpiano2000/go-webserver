@@ -7,7 +7,13 @@
 
 ## Usage
 
+### Run server
+
 `go run cmd/main.go`
+
+### Swagger Docs
+
+`http://localhost:8080/swagger/index.html`
 
 ## Packges Used
 
@@ -45,7 +51,7 @@
 
 ## Features
 
-- [ ] Swagger Docs
+- [x] Swagger Docs
 - [ ] Logging
 - [ ] Exception Handling
 - [ ] CRUD Recipes
