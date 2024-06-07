@@ -21,6 +21,20 @@ func NewRecipeController(useCase recipe.RecipeUseCase) RecipeController {
 	}
 }
 
+// CreateRecipe godoc
+// @Summary Create Recipe
+// @Description Create Recipe
+// @Tags Recipe
+// @Accept json
+// @Produce json
+// @Success     200         {object}    models.RecipeRequest
+// @Failure     400         {object}    response.ErrorResponse
+// @Failure     401         {object}    response.ErrorResponse
+// @Failure     403         {object}    response.ErrorResponse
+// @Failure     404         {object}    response.ErrorResponse
+// @Failure     422         {object}    response.ErrorResponse
+// @Failure     500         {object}    response.ErrorResponse
+// @Router /os-images [post]
 func (rc RecipeController) CreateRecipe(c *gin.Context) {
 	var recipeSchemas schemas.RecipeSchemaRequest
 	if err := c.ShouldBindJSON(&recipeSchemas); err != nil {
