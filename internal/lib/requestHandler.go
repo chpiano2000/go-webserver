@@ -13,5 +13,9 @@ type RequestHandler struct {
 func NewRequestHandler() RequestHandler {
 	// gin.DefaultWriter = logger.GetGinLogger()
 	engine := gin.New()
+	engine.Use(
+		gin.LoggerWithWriter(gin.DefaultWriter, "/pathsNotToLog/"),
+		gin.Recovery(),
+	)
 	return RequestHandler{Gin: engine}
 }

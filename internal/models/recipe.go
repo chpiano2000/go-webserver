@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type Recipe struct {
 	Id           string    `json:"id"`

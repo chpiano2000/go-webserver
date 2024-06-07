@@ -7,5 +7,6 @@ import (
 
 func main() {
 	log.SetFormatter(&log.JSONFormatter{})
+	log.SetLevel(log.InfoLevel)
 	server.Start()
 }

@@ -5,25 +5,28 @@ import (
 
 	"github.com/go-webserver/internal/interfaces/recipe"
 	"github.com/go-webserver/internal/models"
+
+	logger "github.com/sirupsen/logrus"
 )
 
-type RecipeService struct {
+type recipeService struct {
 	recipeRepo recipe.RecipeRepo
 }
 
-func NewService(recipeRepo recipe.RecipeRepo) RecipeService {
-	return RecipeService{recipeRepo: recipeRepo}
+func NewService(recipeRepo recipe.RecipeRepo) recipe.RecipeUseCase {
+	return &recipeService{recipeRepo: recipeRepo}
 }
 
-func (s RecipeService) Create(request *models.RecipeRequest) (*models.Recipe, error) {
+func (s *recipeService) Create(request *models.RecipeRequest) (*models.Recipe, error) {
 	recipe, err := s.recipeRepo.Create(request)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create recipe: %w", err)
+		logger.Errorf("recipeService::Create: %v", err)
+		return nil, err
 	}
 	return recipe, nil
 }
 
-func (s RecipeService) List() ([]*models.Recipe, error) {
+func (s *recipeService) List() ([]*models.Recipe, error) {
 	recipes, err := s.recipeRepo.List()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create recipe: %w", err)

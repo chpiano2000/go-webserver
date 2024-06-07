@@ -15,7 +15,8 @@
 - uuid: unique id generator
 - viper: environment variables configuration
 - mongo-driver: MongoDB driver
-- logur: logging package
+- logurus: logging package
+- validator: input validation
 
 ## Structure
 
