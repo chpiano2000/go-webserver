@@ -53,8 +53,9 @@
 
 - [x] Swagger Docs
 - [ ] Logging
-- [ ] Exception Handling
-- [ ] CRUD Recipes
+- [x] Exception Handling
+- [x] Panic Recovery
+- [x] CRUD Recipes
 - [ ] CRUD Recipe Books
 - [ ] User Authentications: loging, logout, register
 - [ ] User Authorizations: private and shared recipies
