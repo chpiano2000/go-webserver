@@ -9,6 +9,7 @@ import (
 	"github.com/go-webserver/internal/response"
 	"github.com/go-webserver/internal/schemas"
 	"github.com/go-webserver/pkg/utils"
+	log "github.com/sirupsen/logrus"
 )
 
 type RecipeController struct {
@@ -89,6 +90,7 @@ func (rc RecipeController) GetRecipe(c *gin.Context) {
 	id := c.Param("Id")
 	recipe, err := rc.service.Get(id)
 	if err != nil {
+		log.Info(err)
 		panic(err)
 	}
 	c.JSON(http.StatusOK, response.OK(recipe))

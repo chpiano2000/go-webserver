@@ -7,6 +7,7 @@ import (
 	"github.com/go-webserver/internal/interfaces/recipe"
 	"github.com/go-webserver/internal/models"
 	"github.com/go-webserver/pkg/utils"
+	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -62,16 +63,19 @@ func (m *mongoRecipeRepo) Get(id string) (*models.Recipe, error) {
 	var recipeInDB models.Recipe
 	err = m.db.Collection("recipes").FindOne(context.TODO(), bson.M{"_id": oid}).Decode(&recipeInDB)
 	if err != nil {
-		if _, ok := err.(utils.RecipeMessage); ok {
-			return nil, utils.RecipeNotFound
-		}
-		return nil, err
+		log.Infof("mongoRecipeRepo::Get %v", err)
+		return nil, utils.RecipeNotFound
 	}
 	return &recipeInDB, nil
 }
 
 func (m *mongoRecipeRepo) Delete(id string) error {
 	oid, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return err
+	}
+
+	_, err = m.Get(id)
 	if err != nil {
 		return err
 	}
