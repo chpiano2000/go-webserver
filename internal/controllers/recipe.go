@@ -115,3 +115,25 @@ func (rc RecipeController) DeleteRecipe(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, utils.Serialize(c, utils.DeleteRecipeSuccessfully))
 }
+
+func (rc RecipeController) UpdateRecipe(c *gin.Context) {
+	var payload schemas.RecipeSchemaPayload
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		resp := utils.Serialize(c, utils.UnprocessableEntity)
+		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, resp)
+		return
+	}
+
+	recipe, err := rc.service.Update(&models.RecipeUpdateRequest{
+		Id:           c.Param("Id"),
+		Name:         payload.Name,
+		Prep:         payload.Prep,
+		Cook:         payload.Cook,
+		Ingredients:  payload.Ingredients,
+		Instructions: payload.Instructions,
+	})
+	if err != nil {
+		panic(err)
+	}
+	c.JSON(http.StatusOK, response.OK(recipe))
+}

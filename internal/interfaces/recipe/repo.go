@@ -7,4 +7,5 @@ type RecipeRepo interface {
 	List() ([]*models.Recipe, error)
 	Get(id string) (*models.Recipe, error)
 	Delete(id string) error
+	Update(Id string, name *string, prep *string, cook *string, ingredients *[]string, instructions *[]string) error
 }
