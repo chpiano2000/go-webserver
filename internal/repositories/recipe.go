@@ -86,3 +86,46 @@ func (m *mongoRecipeRepo) Delete(id string) error {
 	}
 	return nil
 }
+
+func (m *mongoRecipeRepo) Update(Id string, name, prep, cook *string, ingredients, instructions *[]string) error {
+	oid, err := primitive.ObjectIDFromHex(Id)
+	if err != nil {
+		return err
+	}
+
+	_, err = m.Get(Id)
+	if err != nil {
+		log.Infof("mongoRecipeRepo::Update::Get %v", err)
+		return utils.RecipeNotFound
+	}
+
+	updateOpts := bson.M{}
+	if name != nil {
+		updateOpts["name"] = name
+	}
+	if prep != nil {
+		updateOpts["prep"] = prep
+	}
+	if cook != nil {
+		updateOpts["cook"] = cook
+	}
+	if ingredients != nil {
+		updateOpts["ingredients"] = ingredients
+	}
+	if instructions != nil {
+		updateOpts["instructions"] = ingredients
+	}
+
+	searchOpts := bson.M{
+		"_id": oid,
+	}
+	update := bson.M{
+		"$set": updateOpts,
+	}
+	_, err = m.db.Collection("recipes").UpdateOne(context.TODO(), searchOpts, update)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

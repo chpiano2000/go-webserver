@@ -55,3 +55,30 @@ func (s *recipeService) Delete(id string) error {
 	}
 	return nil
 }
+
+func (s *recipeService) Update(request *models.RecipeUpdateRequest) (*models.Recipe, error) {
+	_, err := s.recipeRepo.Get(request.Id)
+	if err != nil {
+		logger.Errorf("recipeService::Update::Get - %v", err)
+		return nil, err
+	}
+	err = s.recipeRepo.Update(
+		request.Id,
+		&request.Name,
+		&request.Prep,
+		&request.Cook,
+		&request.Ingredients,
+		&request.Instructions,
+	)
+	if err != nil {
+		logger.Errorf("recipeService::Update::Update - %v", err)
+		return nil, err
+	}
+
+	recipe, err := s.recipeRepo.Get(request.Id)
+	if err != nil {
+		logger.Errorf("recipeService::Update::Get %v", err)
+		return nil, err
+	}
+	return recipe, nil
+}
