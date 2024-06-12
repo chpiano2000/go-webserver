@@ -22,10 +22,8 @@ pipeline {
       steps{
         echo 'Starting to build docker image'
         script {
-          def commitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true)
-          tag = "${imageName}:${commitHash}"
-          echo tag
-          dockerImage = docker.build "${imageName}:latest"
+          def commitHash = sh('git log -1 --pretty=%h')
+          dockerImage = docker.build "${imageName}:${commitHash}"
         }
       }
     }
@@ -38,7 +36,7 @@ pipeline {
               sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
 
               // Push the image
-              sh "docker push ${imageName}:latest"
+              sh "docker push ${imageName}:${commitHash}"
           }
         }
       }
