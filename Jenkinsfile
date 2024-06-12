@@ -14,10 +14,10 @@ pipeline {
 
     stage('Clone Repository') {
       steps {
-          echo 'Starting to build docker image'
-          git([url: 'https://github.com/chpiano2000/go-webserver.git', branch: 'cicd'])
-        }
+        echo 'Starting to build docker image'
+        git([url: 'https://github.com/chpiano2000/go-webserver.git', branch: 'cicd'])
       }
+    }
 
     stage('Build image') {
       steps{
@@ -26,6 +26,7 @@ pipeline {
           def commitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true)
           tag = "${imagename}:${commitHash}"
           dockerImage = docker.build ${tag}
+        }
       }
     }
 
