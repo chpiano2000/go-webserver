@@ -1,8 +1,7 @@
 pipeline {
-
   environment {
       dockerHubCredential = '43fb44ba-27e9-4061-8db0-d20dbe3689c6'
-      imageName = 'vochidat0/go-webserver'
+      imageName = 'datvc/go-webserver'
       containerName = 'recipe'
       dockerImage = ''
       tag = ''
@@ -26,7 +25,7 @@ pipeline {
           def commitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true)
           tag = "${imageName}:${commitHash}"
           echo tag
-          dockerImage = docker.build "${tag}"
+          dockerImage = docker.build "${commitHash}"
         }
       }
     }
