@@ -24,7 +24,7 @@ pipeline {
         script {
           def commitHash = sh('git log -1 --pretty=%h')
           tag = '${imageName}:${commitHash}'
-          dockerImage = docker.build tag
+          dockerImage = docker.build(tag)
         }
       }
     }
