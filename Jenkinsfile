@@ -29,7 +29,7 @@ pipeline {
     stage('Push Image') {
      steps {
        script {
-        docker.withDockerRegistry(registry: 'https://registry.hub.docker.com', '43fb44ba-27e9-4061-8db0-d20dbe3689c6') {
+        docker.withRegistry(registry: 'https://registry.hub.docker.com', '43fb44ba-27e9-4061-8db0-d20dbe3689c6') {
           docker.push("${COMMIT_HASH}")
         }
        }
