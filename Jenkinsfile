@@ -26,24 +26,21 @@ pipeline {
           // dockerImage = docker.build "$imageName:$commitHash"
         }
         script {
-          def tag = ${env.imageName}:${env.commitHash}
-          env.TAG = tag
+          dockerImage = docker.build "$imageName:$commitHash"
         }
-        echo "Commit Hash: ${env.COMMIT_HASH}"
-        echo "tag: ${env.TAG}"
       }
     }
 
-    //stage('Push Image') {
-    //  steps {
-    //    script {
-    //      // Use Jenkins credentials for Docker Hub login
-    //      withCredentials([usernamePassword(credentialsId: dockerHubCredential, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-    //          dockerImage.push(${env.imageName}:${env.commitHash}")
-    //      }
-    //    }
-    //  }
-    //}
+    stage('Push Image') {
+     steps {
+       script {
+         // Use Jenkins credentials for Docker Hub login
+         withCredentials([usernamePassword(credentialsId: dockerHubCredential, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+             dockerImage.push(${env.imageName}:${env.commitHash}")
+         }
+       }
+     }
+    }
 
   }
 }
