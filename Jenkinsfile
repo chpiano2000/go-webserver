@@ -25,20 +25,21 @@ pipeline {
           env.COMMIT_HASH = commitHash
         }
         echo "Commit Hash: ${env.COMMIT_HASH}"
-        sh 'echo ${COMMIT_HASH}'
+        sh 'docker build -t ${imageName}:${COMMIT_HASH} .'
       }
     }
 
-    //stage('Push Image') {
-    //  steps {
-    //    script {
-    //      // Use Jenkins credentials for Docker Hub login
-    //      withCredentials([usernamePassword(credentialsId: dockerHubCredential, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-    //          dockerImage.push(${env.imageName}:${env.commitHash}")
-    //      }
-    //    }
-    //  }
-    //}
+    stage('Push Image') {
+     steps {
+       script {
+         // Use Jenkins credentials for Docker Hub login
+         withCredentials([usernamePassword(credentialsId: dockerHubCredential, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+            sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
+            sh "docker push ${imagename}:${COMMIT_HASH}"
+         }
+       }
+     }
+    }
 
   }
 }
