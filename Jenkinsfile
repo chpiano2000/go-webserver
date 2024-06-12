@@ -30,7 +30,7 @@ pipeline {
       }
     }
 
-    stage('Deploy Image') {
+    stage('Push Image') {
       steps {
         script {
           // Use Jenkins credentials for Docker Hub login
@@ -39,6 +39,21 @@ pipeline {
 
               // Push the image
               sh "docker push ${tag}"
+          }
+        }
+      }
+    }
+
+
+    stage('Push Image') {
+      steps {
+        script {
+          // Use Jenkins credentials for Docker Hub login
+          withCredentials([usernamePassword(credentialsId: dockerHubCredential, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+              sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
+
+              // Push the image
+              sh "docker push ${imageName}:latest"
           }
         }
       }
