@@ -24,7 +24,7 @@ pipeline {
         echo 'Starting to build docker image'
         script {
           def commitHash = sh(script: 'git rev-parse --short HEAD', returnStdout: true)
-          tag = "${imagename}:${commitHash}"
+          tag = "${imageName}:${commitHash}"
           dockerImage = docker.build ${tag}
         }
       }
