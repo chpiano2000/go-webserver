@@ -1,6 +1,6 @@
 .PHONY: all webserver install docs
 
-all: install webserver 
+all: install webserver
 build: webserver
 NUM_CPU_CORES := $(shell nproc --all)
 DOUBLE_CPU_CORES = $(shell expr $(NUM_CPU_CORES) \* 2)
