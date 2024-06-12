@@ -1,6 +1,4 @@
 pipeline {
-  def app
-
   environment {
       dockerHubCredential = '43fb44ba-27e9-4061-8db0-d20dbe3689c6'
       imageName = 'datvc/go-webserver'
@@ -23,7 +21,7 @@ pipeline {
         script {
           def commitHash = sh(script: 'git log -1 --pretty=%h', returnStdout: true)
           env.COMMIT_HASH = commitHash
-          app = docker.build("$imageName")
+          docker.build("$imageName")
         }
       }
     }
@@ -32,7 +30,7 @@ pipeline {
      steps {
        script {
         docker.withDockerRegistry(registry: 'https://registry.hub.docker.com', '43fb44ba-27e9-4061-8db0-d20dbe3689c6') {
-          app.push("${COMMIT_HASH}")
+          docker.push("${COMMIT_HASH}")
         }
        }
      }
