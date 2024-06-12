@@ -1,11 +1,11 @@
 definitions:
   models.Recipe:
     properties:
-      _id:
-        type: string
       cook:
         type: string
       created_at:
+        type: string
+      id:
         type: string
       ingredients:
         items:
@@ -92,7 +92,7 @@ paths:
     delete:
       consumes:
       - application/json
-      description: Create Recipe
+      description: Delete Recipe
       parameters:
       - description: Recipe Id
         in: path
@@ -114,7 +114,7 @@ paths:
           description: Internal Server Error
           schema:
             $ref: '#/definitions/response.ErrorResponse'
-      summary: Create Recipe
+      summary: Delete Recipe
       tags:
       - Recipe
     get:
@@ -145,11 +145,56 @@ paths:
       summary: Get One Recipe
       tags:
       - Recipe
+    patch:
+      consumes:
+      - application/json
+      description: Update Recipe
+      parameters:
+      - description: Recipe Id
+        in: path
+        name: recipe_id
+        required: true
+        type: string
+      - description: offset
+        in: query
+        name: offset
+        type: integer
+      - description: size
+        in: query
+        name: size
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Recipe'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Update Recipe
+      tags:
+      - Recipe
   /recipes:
     get:
       consumes:
       - application/json
       description: List All Recipes
+      parameters:
+      - description: pagination offset
+        in: query
+        name: offset
+        type: integer
+      - description: pagination size
+        in: query
+        name: size
+        type: integer
       produces:
       - application/json
       responses:

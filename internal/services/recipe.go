@@ -29,8 +29,8 @@ func (s *recipeService) Create(request *models.RecipeRequest) (*models.Recipe, e
 	return recipe, nil
 }
 
-func (s *recipeService) List() ([]*models.Recipe, error) {
-	recipes, err := s.recipeRepo.List()
+func (s *recipeService) List(opts *models.RecipeFilter) ([]*models.Recipe, error) {
+	recipes, err := s.recipeRepo.List(opts)
 	if err != nil {
 		logger.Errorf("recipeService::List - %v", err)
 		return nil, err

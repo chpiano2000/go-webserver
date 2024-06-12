@@ -11,6 +11,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type mongoRecipeRepo struct {
@@ -41,11 +42,18 @@ func (m *mongoRecipeRepo) Create(request *models.RecipeRequest) (string, error) 
 	return oidStr, nil
 }
 
-func (m *mongoRecipeRepo) List() ([]*models.Recipe, error) {
-	cur, err := m.db.Collection("recipes").Find(context.TODO(), bson.D{})
+func (m *mongoRecipeRepo) List(opts *models.RecipeFilter) ([]*models.Recipe, error) {
+	offset := opts.Offset
+	size := opts.Size
+	if size == 0 {
+		size = 10
+	}
+	mongoOpts := options.Find().SetSkip(offset).SetLimit(size)
+	cur, err := m.db.Collection("recipes").Find(context.TODO(), bson.D{}, mongoOpts)
 	if err != nil {
 		return nil, err
 	}
+
 	var recipes []*models.Recipe
 	err = cur.All(context.TODO(), &recipes)
 	if err != nil {
