@@ -14,7 +14,7 @@ pipeline {
 
     stage('Clone Repository') {
       steps {
-        echo 'Starting to build docker image'
+        echo 'Cloning repositories'
         git([url: 'https://github.com/chpiano2000/go-webserver.git', branch: 'cicd'])
       }
     }
