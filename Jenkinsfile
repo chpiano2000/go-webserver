@@ -4,7 +4,6 @@ pipeline {
       imageName = 'datvc/go-webserver'
       containerName = 'recipe'
       dockerImage = ''
-      tag = ''
   }
 
   agent any
@@ -21,12 +20,17 @@ pipeline {
     stage('Build image') {
       steps{
         echo 'Starting to build docker image'
-        script {
-          env.commitHash = sh('git log -1 --pretty=%h')
-          env.tag = sh('echo "${imageName}:${env.commitHash}"')
-          echo '${env.tag}'
-          // dockerImage = docker.build "$imageName:$commitHash"
+        environment {
+          commitHash = sh(returnStdout: true, script: 'git log -1 --pretty=%h')
+          tag = "${imageName}:${commitHash}"
         }
+        echo "Commit Hash: ${commitHash}"
+        echo "Tag: ${tag}"
+        //script {
+          // env.tag = sh('echo "${imageName}:${env.commitHash}"')
+          //sh('echo $tag')
+          // dockerImage = docker.build "$imageName:$commitHash"
+        //}
       }
     }
 
