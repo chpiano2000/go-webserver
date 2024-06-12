@@ -24,6 +24,8 @@ pipeline {
         script {
           def commitHash = sh('git log -1 --pretty=%h')
           tag = '${imageName}:${commitHash}'
+          echo tag
+          echo '$tag'
           dockerImage = docker.build "${imageName}:${commitHash}"
         }
       }
@@ -37,7 +39,7 @@ pipeline {
               sh "docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD"
 
               // Push the image
-              sh "docker push ${tag}"
+              sh "docker push $tag"
           }
         }
       }
