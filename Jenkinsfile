@@ -25,7 +25,7 @@ pipeline {
           //sh('echo $tag')
           // dockerImage = docker.build "$imageName:$commitHash"
         }
-        echo "Commit Hash: ${commitHash}"
+        echo "Commit Hash: '${commitHash}'"
       }
     }
 
