@@ -23,10 +23,9 @@ pipeline {
         script {
           def commitHash = sh(script: 'git log -1 --pretty=%h', returnStdout: true)
           env.COMMIT_HASH = commitHash
-          // dockerImage = docker.build "$imageName:$commitHash"
         }
         script {
-          dockerImage = docker.build "$imageName:$commitHash"
+          dockerImage = docker.build "$imageName:$COMMIT_HASH"
         }
       }
     }
@@ -36,7 +35,7 @@ pipeline {
        script {
          // Use Jenkins credentials for Docker Hub login
          withCredentials([usernamePassword(credentialsId: dockerHubCredential, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-             sh "docker push ${imagename}:${commitHash}"
+             sh "docker push ${imagename}:${COMMIT_HASH}"
          }
        }
      }
