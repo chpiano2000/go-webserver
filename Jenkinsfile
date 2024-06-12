@@ -20,17 +20,12 @@ pipeline {
     stage('Build image') {
       steps{
         echo 'Starting to build docker image'
-        environment {
-          commitHash = sh('git log -1 --pretty=%h')
-          //tag = "${imageName}:${commitHash}"
-        }
-        echo "Commit Hash: ${commitHash}"
-        echo "Tag: ${tag}"
-        //script {
-          // env.tag = sh('echo "${imageName}:${env.commitHash}"')
+        script {
+          env.commitHash = sh('git log -1 --pretty=%h')
           //sh('echo $tag')
           // dockerImage = docker.build "$imageName:$commitHash"
-        //}
+        }
+        echo "Commit Hash: ${commitHash}"
       }
     }
 
