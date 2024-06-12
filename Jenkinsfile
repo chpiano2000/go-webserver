@@ -23,9 +23,8 @@ pipeline {
         echo 'Starting to build docker image'
         script {
           def commitHash = sh('git log -1 --pretty=%h')
-          tag = ${imageName}:${commitHash}
-          echo ${tag}
-          dockerImage = docker.build "${tag}"
+          tag = '${imageName}:${commitHash}'
+          dockerImage = docker.build tag
         }
       }
     }
