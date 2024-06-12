@@ -64,11 +64,20 @@ func (rc RecipeController) CreateRecipe(c *gin.Context) {
 // @Tags Recipe
 // @Accept json
 // @Produce json
+// @Param offset query int false "pagination offset"
+// @Param size query int false "pagination size"
 // @Success     200         {array}    models.Recipe
 // @Failure     500         {object}    response.ErrorResponse
 // @Router /recipes [get]
 func (rc RecipeController) ListRecipes(c *gin.Context) {
-	recipes, err := rc.service.List()
+	var queryParams models.RecipeFilter
+	err := c.ShouldBindQuery(&queryParams)
+	if err != nil {
+		resp := utils.Serialize(c, utils.UnprocessableEntity)
+		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, resp)
+		return
+	}
+	recipes, err := rc.service.List(&queryParams)
 	if err != nil {
 		panic(err)
 	}
@@ -97,8 +106,8 @@ func (rc RecipeController) GetRecipe(c *gin.Context) {
 }
 
 // DeleteRecipe godoc
-// @Summary Create Recipe
-// @Description Create Recipe
+// @Summary Delete Recipe
+// @Description Delete Recipe
 // @Tags Recipe
 // @Accept json
 // @Produce json
@@ -116,6 +125,19 @@ func (rc RecipeController) DeleteRecipe(c *gin.Context) {
 	c.JSON(http.StatusOK, utils.Serialize(c, utils.DeleteRecipeSuccessfully))
 }
 
+// UpdateRecipe godoc
+// @Summary Update Recipe
+// @Description Update Recipe
+// @Tags Recipe
+// @Accept json
+// @Produce json
+// @Param recipe_id path string true "Recipe Id"
+// @Param offset query int false "offset"
+// @Param size query int false "size"
+// @Success     200         {object}     models.Recipe
+// @Failure     400         {object}    response.ErrorResponse
+// @Failure     500         {object}    response.ErrorResponse
+// @Router /recipe/{recipe_id} [patch]
 func (rc RecipeController) UpdateRecipe(c *gin.Context) {
 	var payload schemas.RecipeSchemaPayload
 	if err := c.ShouldBindJSON(&payload); err != nil {

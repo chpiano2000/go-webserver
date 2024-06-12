@@ -15,6 +15,12 @@ type Recipe struct {
 	UpdatedAt    time.Time `json:"updated_at"`
 }
 
+type RecipeFilter struct {
+	Offset int64 `form:"offset" json:"offset" binding:"omitempty,gte=0"`
+	Size   int64 `form:"size" json:"size" binding:"omitempty,gte=0,lte=100"`
+	// Name   *string `json:"name"`
+}
+
 type RecipeRequest struct {
 	Name         string   `json:"name"`
 	Prep         string   `json:"prep"`

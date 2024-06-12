@@ -111,7 +111,7 @@ const docTemplate = `{
                 }
             },
             "delete": {
-                "description": "Create Recipe",
+                "description": "Delete Recipe",
                 "consumes": [
                     "application/json"
                 ],
@@ -121,7 +121,7 @@ const docTemplate = `{
                 "tags": [
                     "Recipe"
                 ],
-                "summary": "Create Recipe",
+                "summary": "Delete Recipe",
                 "parameters": [
                     {
                         "type": "string",
@@ -136,6 +136,60 @@ const docTemplate = `{
                         "description": "OK",
                         "schema": {
                             "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "patch": {
+                "description": "Update Recipe",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Recipe"
+                ],
+                "summary": "Update Recipe",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Recipe Id",
+                        "name": "recipe_id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "description": "offset",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "size",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/models.Recipe"
                         }
                     },
                     "400": {
@@ -166,6 +220,20 @@ const docTemplate = `{
                     "Recipe"
                 ],
                 "summary": "List All Recipes",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "pagination offset",
+                        "name": "offset",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "pagination size",
+                        "name": "size",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -190,13 +258,13 @@ const docTemplate = `{
         "models.Recipe": {
             "type": "object",
             "properties": {
-                "_id": {
-                    "type": "string"
-                },
                 "cook": {
                     "type": "string"
                 },
                 "created_at": {
+                    "type": "string"
+                },
+                "id": {
                     "type": "string"
                 },
                 "ingredients": {
