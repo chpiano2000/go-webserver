@@ -21,8 +21,8 @@ pipeline {
       steps{
         echo 'Starting to build docker image'
         environment {
-          commitHash = sh(returnStdout: true, script: 'git log -1 --pretty=%h')
-          tag = "${imageName}:${commitHash}"
+          commitHash = sh('git log -1 --pretty=%h')
+          //tag = "${imageName}:${commitHash}"
         }
         echo "Commit Hash: ${commitHash}"
         echo "Tag: ${tag}"
