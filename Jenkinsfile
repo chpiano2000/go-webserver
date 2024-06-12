@@ -25,9 +25,7 @@ pipeline {
           env.COMMIT_HASH = commitHash
         }
         echo "Commit Hash: ${env.COMMIT_HASH}"
-        script {
-          dockerImage = docker.build "${env.imageName}:${env.COMMIT_HASH}"
-        }
+        sh 'echo ${COMMIT_HASH}'
       }
     }
 
