@@ -36,7 +36,7 @@ pipeline {
        script {
          // Use Jenkins credentials for Docker Hub login
          withCredentials([usernamePassword(credentialsId: dockerHubCredential, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-             dockerImage.push(${env.imageName}:${env.commitHash}")
+             sh "docker push ${imagename}:${commitHash}"
          }
        }
      }
