@@ -1,11 +1,8 @@
 pipeline {
-  def app
-
   environment {
       dockerHubCredential = '43fb44ba-27e9-4061-8db0-d20dbe3689c6'
       imageName = 'datvc/go-webserver'
       containerName = 'recipe'
-      dockerImage = ''
   }
 
   agent any
