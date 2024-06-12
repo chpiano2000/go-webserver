@@ -26,10 +26,10 @@ pipeline {
           // dockerImage = docker.build "$imageName:$commitHash"
         }
         script {
-          def tag = '${env.imageName}:${env.commitHash}'
+          def tag = ${env.imageName}:${env.commitHash}
           env.TAG = tag
         }
-        echo "Commit Hash: '${env.COMMIT_HASH}'"
+        echo "Commit Hash: ${env.COMMIT_HASH}"
         echo "tag: ${env.TAG}"
       }
     }
