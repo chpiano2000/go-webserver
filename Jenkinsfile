@@ -24,22 +24,23 @@ pipeline {
           def commitHash = sh(script: 'git log -1 --pretty=%h', returnStdout: true)
           env.COMMIT_HASH = commitHash
         }
+        echo '${imageName}:${COMMIT_HASH}'
         script {
-          dockerImage = docker.build "$imageName:$COMMIT_HASH"
+          dockerImage = docker.build "${imageName}:${COMMIT_HASH}"
         }
       }
     }
 
-    stage('Push Image') {
-     steps {
-       script {
-         // Use Jenkins credentials for Docker Hub login
-         withCredentials([usernamePassword(credentialsId: dockerHubCredential, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
-             sh "docker push ${imagename}:${COMMIT_HASH}"
-         }
-       }
-     }
-    }
+    // stage('Push Image') {
+    //  steps {
+    //    script {
+    //      // Use Jenkins credentials for Docker Hub login
+    //      withCredentials([usernamePassword(credentialsId: dockerHubCredential, usernameVariable: 'DOCKER_USERNAME', passwordVariable: 'DOCKER_PASSWORD')]) {
+    //          sh "docker push ${imagename}:${COMMIT_HASH}"
+    //      }
+    //    }
+    //  }
+    // }
 
   }
 }
