@@ -12,5 +12,8 @@ install:
 webserver:
 	go build -gcflags "all=-N -l" -tags dynamic -o webserver cmd/main.go
 
+run:
+	go run cmd/main.go
+
 docs:
 	swag init --generalInfo cmd/main.go

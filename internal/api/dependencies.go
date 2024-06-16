@@ -9,18 +9,30 @@ import (
 )
 
 type Dependences struct {
-	RecipeController *controllers.RecipeController
+	RecipeController  *controllers.RecipeController
+	AccountController *controllers.AccountController
 }
 
 func InitDependences(cfg config.Config) Dependences {
 	mongoClient := databases.NewMongoDB(cfg)
-	// Recipe Dependencies
+
+	// Init Repositories
 	recipeRepo := repositories.NewMongoRecipeRepo(mongoClient)
+	accountRepo := repositories.NewMongoAccountRepo(mongoClient)
+	authRepo := repositories.NewAuthRepo()
+	keysRepo := repositories.NewMongoKeyRepo(mongoClient)
+
+	// Init Services
 	recipeService := services.NewService(recipeRepo)
+	accountService := services.NewAccountService(accountRepo, authRepo, keysRepo)
+
+	// Init Controllers
 	recipeControllers := controllers.NewRecipeController(recipeService)
+	accountControllers := controllers.NewAccountController(accountService)
 
 	dep := Dependences{
-		RecipeController: &recipeControllers,
+		RecipeController:  &recipeControllers,
+		AccountController: &accountControllers,
 	}
 	return dep
 }
