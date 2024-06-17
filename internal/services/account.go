@@ -106,7 +106,7 @@ func (ac *accountService) Login(user *models.LoginRequest) (resp models.LoginRes
 
 	privateKeyString, publicKeyString := ac.authRepo.ConvertRSAToString(privateKey, publicKey)
 
-	err = ac.keysRepo.InsertKeys(userInDB.Id, privateKeyString, publicKeyString, refreshToken)
+	err = ac.keysRepo.InsertKeys(userInDB.Id, publicKeyString, privateKeyString, refreshToken)
 	if err != nil {
 		logger.Errorf("accountService::Signup::InsertKeys %v", err)
 		resp.Err = err
