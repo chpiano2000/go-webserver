@@ -22,7 +22,7 @@ func NewAccountController(useCase account.AccountUseCase) AccountController {
 }
 
 func (ac AccountController) Signup(c *gin.Context) {
-	var signupSchemas schemas.AccountSchemaRequest
+	var signupSchemas schemas.SignupSchemaRequest
 	if err := c.ShouldBindJSON(&signupSchemas); err != nil {
 		resp := utils.Serialize(c, utils.UnprocessableEntity)
 		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, resp)
@@ -41,5 +41,27 @@ func (ac AccountController) Signup(c *gin.Context) {
 	}
 	successCode := "AccountCreated"
 	successMessage := "Account Created Successfully"
+	c.JSON(http.StatusCreated, response.Created(successCode, successMessage, account.Account))
+}
+
+func (ac AccountController) Login(c *gin.Context) {
+	var loginSchemas schemas.LoginSchemaRequest
+	if err := c.ShouldBindJSON(&loginSchemas); err != nil {
+		resp := utils.Serialize(c, utils.UnprocessableEntity)
+		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, resp)
+		return
+	}
+
+	loginRequest := models.LoginRequest{
+		Email:    loginSchemas.Email,
+		Password: loginSchemas.Password,
+	}
+
+	account := ac.service.Login(&loginRequest)
+	if account.Err != nil {
+		panic(account.Err)
+	}
+	successCode := "LoginCreated"
+	successMessage := "Login Successfully"
 	c.JSON(http.StatusCreated, response.Created(successCode, successMessage, account.Account))
 }

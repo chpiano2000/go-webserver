@@ -14,6 +14,7 @@ func (rr AccountRouter) Setup(group string) {
 	api := rr.handler.Gin.Group(group)
 	{
 		api.POST("/signup", rr.accountController.Signup)
+		api.POST("/login", rr.accountController.Login)
 	}
 }
 
