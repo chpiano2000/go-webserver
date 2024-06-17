@@ -28,13 +28,7 @@ func (au *authRepo) CheckPasswordHash(password, hash string) bool {
 	return err == nil
 }
 
-func (au *authRepo) GenerateKeyPair() ([]byte, []byte, error) {
-	// Generate a new RSA private key with 2048 bits
-	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
-	if err != nil {
-		return nil, nil, err
-	}
-
+func (au *authRepo) ConvertRSAToString(privateKey *rsa.PrivateKey, publicKey *rsa.PublicKey) (string, string) {
 	// Encode the private key to the PEM format
 	privateKeyPEM := &pem.Block{
 		Type:  "RSA PRIVATE KEY",
@@ -42,33 +36,44 @@ func (au *authRepo) GenerateKeyPair() ([]byte, []byte, error) {
 	}
 	privatePEM := pem.EncodeToMemory(privateKeyPEM)
 
-	// Extract the public key from the private key
-	publicKey := &privateKey.PublicKey
-
 	publicKeyPEM := &pem.Block{
 		Type:  "RSA PUBLIC KEY",
 		Bytes: x509.MarshalPKCS1PublicKey(publicKey),
 	}
 	publicPEM := pem.EncodeToMemory(publicKeyPEM)
 
-	return privatePEM, publicPEM, nil
+	return string(privatePEM), string(publicPEM)
 }
 
-func (au *authRepo) GenerateTokens(accountID string, email string, privateKey []byte) (string, string, error) {
+func (au *authRepo) GenerateKeyPair() (*rsa.PrivateKey, *rsa.PublicKey, error) {
+	// Generate a new RSA private key with 2048 bits
+	privateKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	publicKey := &privateKey.PublicKey
+
+	return privateKey, publicKey, nil
+}
+
+func (au *authRepo) GenerateTokens(accountID string, email string, privateKey *rsa.PrivateKey) (string, string, error) {
+	iat := time.Now().UTC()
+
 	// Create a new JWT token with claims
-	accessClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub":        email,                            // Subject (user identifier)
-		"iss":        "go-webserver",                   // Issuer
-		"exp":        time.Now().Add(time.Hour).Unix(), // Expiration time
-		"iat":        time.Now().Unix(),                // Issued at
+	accessClaims := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
+		"sub":        email,                           // Subject (user identifier)
+		"iss":        "go-webserver",                  // Issuer
+		"exp":        iat.Add(time.Minute / 2).Unix(), // Expiration time
+		"iat":        iat.Unix(),                      // Issued at
 		"account_id": accountID,
 	})
 
-	refreshClaims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub":        email,                            // Subject (user identifier)
-		"iss":        "go-webserver",                   // Issuer
-		"exp":        time.Now().Add(time.Hour).Unix(), // Expiration time
-		"iat":        time.Now().Unix(),                // Issued at
+	refreshClaims := jwt.NewWithClaims(jwt.SigningMethodRS256, jwt.MapClaims{
+		"sub":        email,                           // Subject (user identifier)
+		"iss":        "go-webserver",                  // Issuer
+		"exp":        iat.Add(time.Hour * 168).Unix(), // Expiration time
+		"iat":        iat.Unix(),                      // Issued at
 		"account_id": accountID,
 	})
 

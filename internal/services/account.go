@@ -65,3 +65,58 @@ func (ac *accountService) Signup(user *models.SignupRequest) (resp models.Signup
 	}
 	return
 }
+
+func (ac *accountService) Login(user *models.LoginRequest) (resp models.LoginResponse) {
+	// Check if an account has regitered
+	userInDB, err := ac.accountRepo.GetByEmail(user.Email)
+	if err != nil {
+		if err.Error() == utils.AccountNotFound.Error() {
+			logger.Errorf("accountService::Signup::GetByEmail %v", err)
+			resp.Err = utils.AccountExists
+			return
+		} else {
+			logger.Errorf("accountService::Signup::GetByEmail %v", err)
+			resp.Err = err
+			return
+		}
+	} 
+
+	// Check if password is correct
+	passwordMatched := ac.authRepo.CheckPasswordHash(user.Password, userInDB.PasswordHashed)
+	if !passwordMatched {
+		logger.Errorf("accountService::Signup::GetByEmail %v", err)
+		resp.Err = utils.AccountExists
+		return
+	}
+
+	privateKey, publicKey, err := ac.authRepo.GenerateKeyPair()
+	if err != nil {
+		logger.Errorf("accountService::Signup::GenerateKeyPair %v", err)
+		resp.Err = err
+		return
+	}
+
+	// Generate token pair
+	accessToken, refreshToken, err := ac.authRepo.GenerateTokens(userInDB.Id, user.Email, privateKey)
+	if err != nil {
+		logger.Errorf("accountService::Signup::GenerateTokens %v", err)
+		resp.Err = err
+		return
+	}
+
+	privateKeyString, publicKeyString := ac.authRepo.ConvertRSAToString(privateKey, publicKey)
+
+	err = ac.keysRepo.InsertKeys(userInDB.Id, privateKeyString, publicKeyString, refreshToken)
+	if err != nil {
+		logger.Errorf("accountService::Signup::InsertKeys %v", err)
+		resp.Err = err
+		return
+	}
+	resp.Account = &models.AccountAuthResponse{
+		Id:          userInDB.Id,
+		Name:        userInDB.Name,
+		Email:       user.Email,
+		AccessToken: accessToken,
+	}
+	return
+}
