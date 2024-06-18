@@ -29,6 +29,8 @@ func (m *mongoKeyRepo) InsertKeys(accountId string, publicKey string, privateKey
 			"account":    accountOid,
 			"publicKey":  publicKey,
 			"privateKey": privateKey,
+			"refreshToken": refreshToken,
+			"refreshTokenUsed": make([]int, 0),
 		},
 	}
 
