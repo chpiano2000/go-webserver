@@ -29,7 +29,8 @@ func Start() {
 	route.Gin.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
 	healthRouter := api.NewHealthRouter(route)
 	recipeRouter := api.NewRecipeRouter(*dep.RecipeController, route)
-	routes := api.NewRoutes(healthRouter, recipeRouter)
+	accountRouter := api.NewAccountRouter(*dep.AccountController, route)
+	routes := api.NewRoutes(healthRouter, recipeRouter, accountRouter)
 	routes.Setup(group)
 
 	route.Gin.Run(":5000")

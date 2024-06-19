@@ -6,8 +6,8 @@ type Route interface {
 
 type Routes []Route
 
-func NewRoutes(healthRoute HealthRouter, recipeRoute RecipeRouter) Routes {
-	return Routes{healthRoute, recipeRoute}
+func NewRoutes(healthRoute HealthRouter, recipeRoute RecipeRouter, accountRoute AccountRouter) Routes {
+	return Routes{healthRoute, recipeRoute, accountRoute}
 }
 
 func (r Routes) Setup(group string) {

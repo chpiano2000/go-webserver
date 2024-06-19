@@ -69,6 +69,16 @@ var (
 		MessageCode: "UnprocessableEntity",
 		Status:      http.StatusUnprocessableEntity,
 	}
+	AccountExists = RecipeMessage{
+		Message:     "Account Exists",
+		MessageCode: "AccountExists",
+		Status:      http.StatusConflict,
+	}
+	AccountNotFound = RecipeMessage{
+		Message:     "Account not found",
+		MessageCode: "AccountNotFound",
+		Status:      http.StatusNotFound,
+	}
 	BadRequest = RecipeMessage{
 		Message:     "Bad request",
 		MessageCode: "BadRequest",
