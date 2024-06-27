@@ -15,6 +15,7 @@ func (rr AccountRouter) Setup(group string) {
 	{
 		api.POST("/signup", rr.accountController.Signup)
 		api.POST("/login", rr.accountController.Login)
+		api.POST("/logout", rr.accountController.Logout)
 	}
 }
 

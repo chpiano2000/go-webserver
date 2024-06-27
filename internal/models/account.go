@@ -14,10 +14,11 @@ type Account struct {
 }
 
 type AccountAuthResponse struct {
-	Id          string `json:"id" `
-	Name        string `json:"name"`
-	Email       string `json:"email"`
-	AccessToken string `json:"access_token"`
+	Id           string `json:"id" `
+	Name         string `json:"name"`
+	Email        string `json:"email"`
+	AccessToken  string `json:"access_token"`
+	RefreshToken string `json:"refresh_token"`
 }
 
 type LoginRequest struct {

@@ -94,4 +94,9 @@ var (
 		MessageCode: "RecipeDeleted",
 		Status:      http.StatusOK,
 	}
+	LogoutUnsuccessfully = RecipeMessage{
+		Message:     "Logout unsuccessfully",
+		MessageCode: "Logout",
+		Status:      http.StatusBadRequest,
+	}
 )

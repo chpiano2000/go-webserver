@@ -58,7 +58,7 @@ func (rc RecipeController) CreateRecipe(c *gin.Context) {
 	c.JSON(http.StatusCreated, response.Created(successCode, successMessage, recipe))
 }
 
-// ListRecipe godoc
+// ListRecipes ListRecipe godoc
 // @Summary List All Recipes
 // @Description List All Recipes
 // @Tags Recipe

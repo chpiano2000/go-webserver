@@ -35,7 +35,7 @@ func (ac *accountService) Signup(user *models.SignupRequest) (resp models.Signup
 			return
 		}
 	}
-	
+
 	if userInDB != nil {
 		if userInDB.Email == user.Email {
 			logger.Errorf("accountService::Signup::GetByEmail %v", err)
@@ -58,10 +58,11 @@ func (ac *accountService) Signup(user *models.SignupRequest) (resp models.Signup
 	}
 
 	resp.Account = &models.AccountAuthResponse{
-		Id:          accountID,
-		Name:        user.Name,
-		Email:       user.Email,
-		AccessToken: "",
+		Id:           accountID,
+		Name:         user.Name,
+		Email:        user.Email,
+		AccessToken:  "",
+		RefreshToken: "",
 	}
 	return
 }
@@ -79,7 +80,7 @@ func (ac *accountService) Login(user *models.LoginRequest) (resp models.LoginRes
 			resp.Err = err
 			return
 		}
-	} 
+	}
 
 	// Check if password is correct
 	passwordMatched := ac.authRepo.CheckPasswordHash(user.Password, userInDB.PasswordHashed)
@@ -113,10 +114,21 @@ func (ac *accountService) Login(user *models.LoginRequest) (resp models.LoginRes
 		return
 	}
 	resp.Account = &models.AccountAuthResponse{
-		Id:          userInDB.Id,
-		Name:        userInDB.Name,
-		Email:       user.Email,
-		AccessToken: accessToken,
+		Id:           userInDB.Id,
+		Name:         userInDB.Name,
+		Email:        user.Email,
+		AccessToken:  accessToken,
+		RefreshToken: refreshToken,
 	}
 	return
+}
+
+func (ac *accountService) Logout(keyId string) error {
+	err := ac.keysRepo.RemoveKeysByID(keyId)
+	if err != nil {
+		logger.Errorf("accountService::Logout::RemoveKeysByID %v", err)
+		return err
+	}
+
+	return nil
 }

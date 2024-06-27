@@ -1,4 +1,23 @@
 definitions:
+  models.AccountAuthResponse:
+    properties:
+      access_token:
+        type: string
+      email:
+        type: string
+      id:
+        type: string
+      name:
+        type: string
+      refresh_token:
+        type: string
+    type: object
+  models.LoginResponse:
+    properties:
+      account:
+        $ref: '#/definitions/models.AccountAuthResponse'
+      err: {}
+    type: object
   models.Recipe:
     properties:
       cook:
@@ -22,6 +41,12 @@ definitions:
       updated_at:
         type: string
     type: object
+  models.SignupResponse:
+    properties:
+      account:
+        $ref: '#/definitions/models.AccountAuthResponse'
+      err: {}
+    type: object
   response.ErrorResponse:
     properties:
       code:
@@ -31,6 +56,16 @@ definitions:
         type: string
       status:
         type: integer
+    type: object
+  schemas.LoginSchemaRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
     type: object
   schemas.RecipeSchemaRequest:
     properties:
@@ -51,9 +86,83 @@ definitions:
     required:
     - name
     type: object
+  schemas.SignupSchemaRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - name
+    - password
+    type: object
 info:
   contact: {}
 paths:
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: User Login
+      parameters:
+      - description: user login payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.LoginSchemaRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Login
+      tags:
+      - Account
+  /logout:
+    post:
+      consumes:
+      - application/json
+      description: User Logout
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SignupResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Logout
+      tags:
+      - Account
   /recipe:
     post:
       consumes:
@@ -211,4 +320,38 @@ paths:
       summary: List All Recipes
       tags:
       - Recipe
+  /signup:
+    post:
+      consumes:
+      - application/json
+      description: User Signup
+      parameters:
+      - description: user signup payload
+        in: body
+        name: payload
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.SignupSchemaRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SignupResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "422":
+          description: Unprocessable Entity
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: Signup
+      tags:
+      - Account
 swagger: "2.0"
