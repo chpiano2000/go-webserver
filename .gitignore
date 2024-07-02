@@ -28,3 +28,6 @@ go.work
 config.yaml
 
 .env
+.idea/
+.vscode/
+tmp/
