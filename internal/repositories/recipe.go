@@ -4,14 +4,15 @@ import (
 	"context"
 	"time"
 
-	"github.com/go-webserver/internal/interfaces/recipe"
-	"github.com/go-webserver/internal/models"
-	"github.com/go-webserver/pkg/utils"
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+
+	"github.com/go-webserver/internal/domains"
+	"github.com/go-webserver/internal/interfaces/recipe"
+	"github.com/go-webserver/internal/models"
 )
 
 type mongoRecipeRepo struct {
@@ -22,7 +23,7 @@ func NewMongoRecipeRepo(db *mongo.Database) recipe.RecipeRepo {
 	return &mongoRecipeRepo{db: db}
 }
 
-func (m *mongoRecipeRepo) Create(request *models.RecipeRequest) (string, error) {
+func (m *mongoRecipeRepo) Create(request *models.RecipeRequest) domains.Result[string] {
 	createdAt := time.Now()
 	result, err := m.db.Collection("recipes").InsertOne(context.TODO(), bson.M{
 		"name":         request.Name,
@@ -34,15 +35,16 @@ func (m *mongoRecipeRepo) Create(request *models.RecipeRequest) (string, error) 
 		"updatedAt":    createdAt,
 	})
 	if err != nil {
-		return "", err
+		log.Errorf("mongoRecipeRepo::Create failed: %v", err)
+		// Infrastructure error - convert to domain error
+		return domains.Failure[string](domains.ErrDatabaseConnection)
 	}
-
 	oid := result.InsertedID.(primitive.ObjectID)
 	oidStr := oid.Hex()
-	return oidStr, nil
+	return domains.Success(oidStr)
 }
 
-func (m *mongoRecipeRepo) List(opts *models.RecipeFilter) ([]*models.Recipe, error) {
+func (m *mongoRecipeRepo) List(opts *models.RecipeFilter) domains.Result[[]*models.Recipe] {
 	offset := opts.Offset
 	size := opts.Size
 	if size == 0 {
@@ -51,60 +53,73 @@ func (m *mongoRecipeRepo) List(opts *models.RecipeFilter) ([]*models.Recipe, err
 	mongoOpts := options.Find().SetSkip(offset).SetLimit(size)
 	cur, err := m.db.Collection("recipes").Find(context.TODO(), bson.D{}, mongoOpts)
 	if err != nil {
-		return nil, err
+		log.Errorf("mongoRecipeRepo::List query failed: %v", err)
+		return domains.Failure[[]*models.Recipe](domains.ErrDatabaseConnection)
 	}
 
 	var recipes []*models.Recipe
 	err = cur.All(context.TODO(), &recipes)
 	if err != nil {
-		return nil, err
+		log.Errorf("mongoRecipeRepo::List decode failed: %v", err)
+		return domains.Failure[[]*models.Recipe](domains.ErrDatabaseConnection)
 	}
-	return recipes, nil
+	return domains.Success(recipes)
 }
 
-func (m *mongoRecipeRepo) Get(id string) (*models.Recipe, error) {
+func (m *mongoRecipeRepo) Get(id string) domains.Result[*models.Recipe] {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return nil, err
+		log.Infof("mongoRecipeRepo::Get invalid id: %s", id)
+		return domains.Failure[*models.Recipe](domains.RecipeError.NotFound())
 	}
 
 	var recipeInDB models.Recipe
 	err = m.db.Collection("recipes").FindOne(context.TODO(), bson.M{"_id": oid}).Decode(&recipeInDB)
 	if err != nil {
-		log.Infof("mongoRecipeRepo::Get %v", err)
-		return nil, utils.RecipeNotFound
+		if err == mongo.ErrNoDocuments {
+			// Expected error - entity not found
+			return domains.Failure[*models.Recipe](domains.RecipeError.NotFound())
+		}
+		// Unexpected infrastructure error
+		log.Errorf("mongoRecipeRepo::Get database error: %v", err)
+		return domains.Failure[*models.Recipe](domains.ErrDatabaseConnection)
 	}
-	return &recipeInDB, nil
+	return domains.Success(&recipeInDB)
 }
 
-func (m *mongoRecipeRepo) Delete(id string) error {
+func (m *mongoRecipeRepo) Delete(id string) domains.Result[bool] {
 	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
-		return err
+		return domains.Failure[bool](domains.RecipeError.NotFound())
 	}
 
-	_, err = m.Get(id)
-	if err != nil {
-		return err
+	getResult := m.Get(id)
+	if getResult.IsFailure() {
+		return domains.Failure[bool](*getResult.Error())
 	}
 
 	_, err = m.db.Collection("recipes").DeleteOne(context.TODO(), bson.M{"_id": oid})
 	if err != nil {
-		return err
+		log.Errorf("mongoRecipeRepo::Get database error: %v", err)
+		return domains.Failure[bool](domains.ErrDatabaseConnection)
 	}
-	return nil
+	return domains.Success(true)
 }
 
-func (m *mongoRecipeRepo) Update(Id string, name, prep, cook *string, ingredients, instructions *[]string) error {
+func (m *mongoRecipeRepo) Update(
+	Id string,
+	name, prep, cook *string,
+	ingredients, instructions *[]string,
+) domains.Result[bool] {
 	oid, err := primitive.ObjectIDFromHex(Id)
 	if err != nil {
-		return err
+		return domains.Failure[bool](domains.RecipeError.NotFound())
 	}
 
-	_, err = m.Get(Id)
+	getResult := m.Get(Id)
 	if err != nil {
 		log.Infof("mongoRecipeRepo::Update::Get %v", err)
-		return utils.RecipeNotFound
+		return domains.Failure[bool](*getResult.Error())
 	}
 
 	updateOpts := bson.M{}
@@ -132,8 +147,9 @@ func (m *mongoRecipeRepo) Update(Id string, name, prep, cook *string, ingredient
 	}
 	_, err = m.db.Collection("recipes").UpdateOne(context.TODO(), searchOpts, update)
 	if err != nil {
-		return err
+		log.Errorf("mongoRecipeRepo::Get database error: %v", err)
+		return domains.Failure[bool](domains.ErrDatabaseConnection)
 	}
 
-	return nil
+	return domains.Success(true)
 }

@@ -4,12 +4,12 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+
 	"github.com/go-webserver/internal/interfaces/recipe"
 	"github.com/go-webserver/internal/models"
 	"github.com/go-webserver/internal/response"
 	"github.com/go-webserver/internal/schemas"
 	"github.com/go-webserver/pkg/utils"
-	log "github.com/sirupsen/logrus"
 )
 
 type RecipeController struct {
@@ -37,8 +37,12 @@ func NewRecipeController(useCase recipe.RecipeUseCase) RecipeController {
 func (rc RecipeController) CreateRecipe(c *gin.Context) {
 	var recipeSchemas schemas.RecipeSchemaRequest
 	if err := c.ShouldBindJSON(&recipeSchemas); err != nil {
-		resp := utils.Serialize(c, utils.UnprocessableEntity)
-		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, resp)
+		c.JSON(http.StatusUnprocessableEntity, response.ErrorResponse{
+			Status:  http.StatusUnprocessableEntity,
+			Code:    "UnprocessableEntity",
+			Message: "Invalid request body",
+			Data:    nil,
+		})
 		return
 	}
 
@@ -49,13 +53,20 @@ func (rc RecipeController) CreateRecipe(c *gin.Context) {
 		Ingredients:  recipeSchemas.Ingredients,
 		Instructions: recipeSchemas.Instructions,
 	}
-	recipe, err := rc.service.Create(&recipeRequest)
-	if err != nil {
-		panic(err)
+	createResult := rc.service.Create(&recipeRequest)
+	if createResult.IsFailure() {
+		err := createResult.Error()
+		status := utils.MapErrorToStatus(*createResult.Error())
+		c.JSON(status, response.ErrorResponse{
+			Status:  status,
+			Code:    err.Code,
+			Message: err.Message,
+			Data:    nil,
+		})
 	}
 	successCode := "RecipeCreated"
 	successMessage := "Recipe Created Successfully"
-	c.JSON(http.StatusCreated, response.Created(successCode, successMessage, recipe))
+	c.JSON(http.StatusCreated, response.Created(successCode, successMessage, createResult.Value()))
 }
 
 // ListRecipe godoc
@@ -73,15 +84,27 @@ func (rc RecipeController) ListRecipes(c *gin.Context) {
 	var queryParams models.RecipeFilter
 	err := c.ShouldBindQuery(&queryParams)
 	if err != nil {
-		resp := utils.Serialize(c, utils.UnprocessableEntity)
-		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, resp)
+		c.JSON(http.StatusUnprocessableEntity, response.ErrorResponse{
+			Status:  http.StatusUnprocessableEntity,
+			Code:    "UnprocessableEntity",
+			Message: "Invalid request body",
+			Data:    nil,
+		})
 		return
 	}
-	recipes, err := rc.service.List(&queryParams)
-	if err != nil {
-		panic(err)
+	listResult := rc.service.List(&queryParams)
+	if listResult.IsFailure() {
+		err := listResult.Error()
+		status := utils.MapErrorToStatus(*listResult.Error())
+		c.JSON(status, response.ErrorResponse{
+			Status:  status,
+			Code:    err.Code,
+			Message: err.Message,
+			Data:    nil,
+		})
+		return
 	}
-	c.JSON(http.StatusOK, response.OK(recipes))
+	c.JSON(http.StatusOK, response.OK(listResult.Value()))
 }
 
 // GetRecipe godoc
@@ -97,12 +120,19 @@ func (rc RecipeController) ListRecipes(c *gin.Context) {
 // @Router /recipe/{recipe_id} [get]
 func (rc RecipeController) GetRecipe(c *gin.Context) {
 	id := c.Param("Id")
-	recipe, err := rc.service.Get(id)
-	if err != nil {
-		log.Info(err)
-		panic(err)
+	result := rc.service.Get(id)
+	if result.IsFailure() {
+		err := result.Error()
+		status := utils.MapErrorToStatus(*result.Error())
+		c.JSON(status, response.ErrorResponse{
+			Status:  status,
+			Code:    err.Code,
+			Message: err.Message,
+			Data:    nil,
+		})
+		return
 	}
-	c.JSON(http.StatusOK, response.OK(recipe))
+	c.JSON(http.StatusOK, response.OK(result.Value()))
 }
 
 // DeleteRecipe godoc
@@ -118,9 +148,17 @@ func (rc RecipeController) GetRecipe(c *gin.Context) {
 // @Router /recipe/{recipe_id} [delete]
 func (rc RecipeController) DeleteRecipe(c *gin.Context) {
 	id := c.Param("Id")
-	err := rc.service.Delete(id)
-	if err != nil {
-		panic(err)
+	result := rc.service.Delete(id)
+	if result.IsFailure() {
+		err := result.Error()
+		status := utils.MapErrorToStatus(*result.Error())
+		c.JSON(status, response.ErrorResponse{
+			Status:  status,
+			Code:    err.Code,
+			Message: err.Message,
+			Data:    nil,
+		})
+		return
 	}
 	c.JSON(http.StatusOK, utils.Serialize(c, utils.DeleteRecipeSuccessfully))
 }
@@ -141,12 +179,16 @@ func (rc RecipeController) DeleteRecipe(c *gin.Context) {
 func (rc RecipeController) UpdateRecipe(c *gin.Context) {
 	var payload schemas.RecipeSchemaPayload
 	if err := c.ShouldBindJSON(&payload); err != nil {
-		resp := utils.Serialize(c, utils.UnprocessableEntity)
-		c.AbortWithStatusJSON(http.StatusUnprocessableEntity, resp)
+		c.JSON(http.StatusUnprocessableEntity, response.ErrorResponse{
+			Status:  http.StatusUnprocessableEntity,
+			Code:    "UnprocessableEntity",
+			Message: "Invalid request body",
+			Data:    nil,
+		})
 		return
 	}
 
-	recipe, err := rc.service.Update(&models.RecipeUpdateRequest{
+	result := rc.service.Update(&models.RecipeUpdateRequest{
 		Id:           c.Param("Id"),
 		Name:         payload.Name,
 		Prep:         payload.Prep,
@@ -154,8 +196,16 @@ func (rc RecipeController) UpdateRecipe(c *gin.Context) {
 		Ingredients:  payload.Ingredients,
 		Instructions: payload.Instructions,
 	})
-	if err != nil {
-		panic(err)
+	if result.IsFailure() {
+		err := result.Error()
+		status := utils.MapErrorToStatus(*err)
+		c.JSON(status, response.ErrorResponse{
+			Status:  status,
+			Code:    err.Code,
+			Message: err.Message,
+			Data:    nil,
+		})
+		return
 	}
-	c.JSON(http.StatusOK, response.OK(recipe))
+	c.JSON(http.StatusOK, response.OK(result.Value()))
 }
